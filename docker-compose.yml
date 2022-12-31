@@ -1,0 +1,51 @@
+version: '3.6'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab
+    restart: unless-stopped
+    hostname: 'localhost'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        gitlab_rails['initial_root_password'] = File.read('/run/secrets/gitlab_root_password').gsub("\n", "")
+    secrets:
+      - gitlab_root_password
+    ports:
+      - '80:80'
+      - '8929:8929'
+      - '1443:443'
+      - '2224:22'
+    volumes:
+      - 'gitlab_config:/etc/gitlab'
+      - 'gitlab_logs:/var/log/gitlab'
+      - 'gitlab_data:/var/opt/gitlab'
+    shm_size: '2gb'
+    networks:
+      - gitlab
+
+  gitlab-runner:
+    image: 'gitlab/gitlab-runner:alpine'
+    container_name: 'gitlab-runner'
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    volumes:
+      - 'gitlab_runner_config:/etc/gitlab-runner'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - gitlab
+
+networks:
+  gitlab:
+
+volumes:
+  gitlab_config: {}
+  gitlab_logs: {}
+  gitlab_data: {}
+  gitlab_runner_config: {}
+
+secrets:
+  gitlab_root_password:
+    file: ./root_password.txt
