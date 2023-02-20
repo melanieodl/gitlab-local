@@ -1,2 +1,5 @@
 .env
+.env*
+!.env.default
+!.env.example
 .idea
