@@ -6,7 +6,7 @@ Run Gitlab server and runner locally in containers and start practicing Gitlab C
 
 1. Docker and Docker Compose must be installed on your machine.
 2. Make sure that no other services are running on the ports that gitlab-local will use. If you encounter a port conflict when starting your Docker containers, you can change the port mappings in the `docker-compose.yml` file or stop the conflicting services.
-3. Ensure that any required environment variables are set in an `.env` file. The `.env` file should be located in the same directory as the `docker-compose.yml` file and contain values for all required environment variables. You can use the `.env.example` file as a template for the required environment variables.
+3. Ensure that any required environment variables are set in an `.env` file. The `.env` file should be located in the same directory as the `docker-compose.yml` file and contain values for all required environment variables. You can use the `.env.example` file as a template for the required environment variables, also notice that `.env.default` was provided.
 
 ## Usage
 
@@ -51,10 +51,10 @@ To start a Minio container for the Terraform S3 Backend Configuration, run with 
 ### 1. Set environment variables
 To set the environment variables for the Minio container, add the following lines to your `.env` file:
 ```text
-MINIO_ROOT_USER={{access-key}}
-MINIO_ROOT_PASSWORD={{secret-key}}
+GITLAB_S3_USER=access-key
+GITLAB_S3_PASSWORD=secret-key
 ```
-Replace `{{access-key}}` and `{{secret-key}}` with the actual values for the Minio access key and secret key, respectively. 
+Replace `access-key` and `secret-key` with the actual values for the Minio access key and secret key, respectively. 
 These are similar to Amazon S3 credentials, and Minio can be used as a local alternative to S3.
 
 ### 2. Start the Containers
@@ -95,8 +95,8 @@ When running `terraform init ` in your Gitlab pipeline, make sure to pass all ne
 You can set the required environment variables for the GitLab pipeline in the project's Gitlab repository. Go to Settings -> CI/CD -> Variables -> Add variable.
 ```
 terraform init -backend-config="bucket=${BUCKET_NAME}" \
--backend-config="endpoint=http://localhost:9000 \
--backend-config="access_key=${MINIO_USER}" \
--backend-config="secret_key=${MINIO_PASSWORD}"
+-backend-config="endpoint=${GITLAB_S3_ENDPOINT} \
+-backend-config="access_key=${GITLAB_S3_USER}" \
+-backend-config="secret_key=${GITLAB_S3_PASSWORD}"
 ```
 
